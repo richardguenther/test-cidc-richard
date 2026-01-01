@@ -1,14 +1,14 @@
 name: Deploy
 
-  on:
-    push:
-      branches: [main]
+on:
+  push:
+    branches: [main]
 
-  env:
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
-  jobs:
+jobs:
     deploy:
       runs-on: ubuntu-latest
       permissions:
@@ -31,14 +31,13 @@ name: Deploy
               -H "X-Deploy-Token: ${{ secrets.DEPLOY_TOKEN }}" \
               --fail
 
-  GitHub Settings
-
-  Go to: https://github.com/richardguenther/test-cidc-richard/settings/secrets/actions
-
-  Secret:
-  - Name: DEPLOY_TOKEN
-  - Value: a35c6b90df97ae4c02b5c293175535a30120f8139c1b50e57f72c36d5e433852
-
-  Variable (click Variables tab):
-  - Name: DEPLOY_WEBHOOK_URL
-  - Value: https://deploy.test.fryy.de/hooks/deploy-richard-test
+# GitHub Settings
+# Go to: https://github.com/richardguenther/test-cidc-richard/settings/secrets/actions
+#
+# Secret:
+# - Name: DEPLOY_TOKEN
+# - Value: (set in GitHub Secrets)
+#
+# Variable (click Variables tab):
+# - Name: DEPLOY_WEBHOOK_URL
+# - Value: https://deploy.test.fryy.de/hooks/deploy-richard-test
