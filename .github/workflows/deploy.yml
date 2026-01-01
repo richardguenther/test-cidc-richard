@@ -1,0 +1,44 @@
+name: Deploy
+
+  on:
+    push:
+      branches: [main]
+
+  env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        packages: write
+      steps:
+        - uses: actions/checkout@v4
+        - uses: docker/login-action@v3
+          with:
+            registry: ${{ env.REGISTRY }}
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+        - uses: docker/build-push-action@v6
+          with:
+            push: true
+            tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        - name: Deploy
+          run: |
+            curl -X POST "${{ vars.DEPLOY_WEBHOOK_URL }}" \
+              -H "X-Deploy-Token: ${{ secrets.DEPLOY_TOKEN }}" \
+              --fail
+
+  GitHub Settings
+
+  Go to: https://github.com/richardguenther/test-cidc-richard/settings/secrets/actions
+
+  Secret:
+  - Name: DEPLOY_TOKEN
+  - Value: a35c6b90df97ae4c02b5c293175535a30120f8139c1b50e57f72c36d5e433852
+
+  Variable (click Variables tab):
+  - Name: DEPLOY_WEBHOOK_URL
+  - Value: https://deploy.test.fryy.de/hooks/deploy-richard-test
