@@ -9,35 +9,33 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-    deploy:
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-        packages: write
-      steps:
-        - uses: actions/checkout@v4
-        - uses: docker/login-action@v3
-          with:
-            registry: ${{ env.REGISTRY }}
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
-        - uses: docker/build-push-action@v6
-          with:
-            push: true
-            tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-        - name: Deploy
-          run: |
-            curl -X POST "${{ vars.DEPLOY_WEBHOOK_URL }}" \
-              -H "X-Deploy-Token: ${{ secrets.DEPLOY_TOKEN }}" \
-              --fail
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-# GitHub Settings
-# Go to: https://github.com/richardguenther/test-cidc-richard/settings/secrets/actions
-#
-# Secret:
-# - Name: DEPLOY_TOKEN
-# - Value: (set in GitHub Secrets)
-#
-# Variable (click Variables tab):
-# - Name: DEPLOY_WEBHOOK_URL
-# - Value: https://deploy.test.fryy.de/hooks/deploy-richard-test
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # 2026 Best Practice: Generate provenance for supply chain security
+          provenance: true 
+
+      - name: Trigger Webhook
+        run: |
+          curl -X POST "${{ vars.DEPLOY_WEBHOOK_URL }}" \
+            -H "X-Deploy-Token: ${{ secrets.DEPLOY_TOKEN }}" \
+            --fail

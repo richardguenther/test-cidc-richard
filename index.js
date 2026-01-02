@@ -1,14 +1,18 @@
-  const http = require('http');
-  const os = require('os');
+import http from 'node:http';
+import os from 'node:os';
 
-  const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end(`
-      <h1>Test Deploy Works! Now</h1>
-      <p>Time: ${new Date().toISOString()}</p>
-      <p>Host: ${os.hostname()}</p>
-    `);
-  });
+const PORT = process.env.PORT || 3000;
 
-  server.listen(3000, () => console.log('Server running on port 3000'));
-// test
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.end(`
+    <h1>Läuft!</h1>
+    <p>Time: ${new Date().toISOString()}</p>
+    <p>Host: ${os.hostname()}</p>
+    <p>Runtime: Node ${process.version}</p>
+  `);
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
